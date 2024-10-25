@@ -27,31 +27,45 @@ def sitemap():
 
 @app.route('/members', methods=['GET'])
 def handle_hello():
-
-@app.route('/members', methods=['POST'])
-def post_member():
-    body=request.get_json(force=True)
-    if not jackson_family.add_member(body):
-        return jsonify({"message": "Error al registrar el miembro de la familia"})
-    output={}
-    output.message="miembro agregado correctamente"
-    return jsonify(output)
-
-    # members = jackson_family.get_all_members()
-    # response_body = {
-    #     "hello": "world",  
-    #     "family": members
-    # }
-@app.route('/members', methods=['POST'])
-def post_member():
-    body=request.get_json(force=True)
-    if not jackson_family.add_member(body):
-        return jsonify({"message": "Error al registrar el miembro de la familia"})
-    output={}
-    output.message="miembro agregado correctamente"
-    return jsonify(output)
-
+    members=jackson_family.get_all_members()
+    response_body=members
     return jsonify(response_body), 200
+
+@app.route('/member', methods=['POST'])
+def add_a_member():
+    try:
+        body=request.get_json()
+        if not body:
+            return jsonify({"msg": "No request body"}), 400
+        jackson_family.add_member(body)
+        return jsonify("member_added"), 200
+
+    except:
+        return  jsonify({"msg": "Internal server error"}), 500
+
+
+@app.route('/member/<int:id>', methods=['GET'])
+def get_member(id):
+    try:
+        member=jackson_family.get_member(id)
+        if not member:
+            return jsonify({"msg": "No member"}), 400
+        return jsonify(member), 200
+
+    except:
+        return  jsonify({"msg": "Internal server error"}), 500
+
+
+@app.route('/member/<int:id>', methods=['DELETE'])
+def delete_a_member(id):
+    try:
+        member=jackson_family.delete_member(id)
+        if not member:
+            return jsonify({"done":False}), 400
+        return jsonify({"done": True}), 200
+
+    except:
+        return  jsonify({"msg": "Internal server error"}), 500
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
